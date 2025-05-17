@@ -1,4 +1,4 @@
-This submission includes three files: 1. jupyter notebook Python code 2. presentation PowerPoint file 3. project report
+This submission includes three files: 1. jupyter notebook Python code 2. presentation PowerPoint file 3. project report 4.originial data from the WRDS datasource
 ### High-Frequency Mid-Price Movement Prediction
 ## Overview
 Following Kearns and Nevmyvaka (2013),
