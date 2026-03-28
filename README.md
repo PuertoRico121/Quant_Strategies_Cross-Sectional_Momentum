@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project implements a **cross-sectional equity trading strategy** based on ranking and relative performance across assets.
+This project implements a cross-sectional equity trading strategy based on ranking and relative performance across assets.
 
 The objective is to:
 
@@ -12,41 +12,39 @@ The objective is to:
 - Evaluate performance with realistic backtesting assumptions
 - Understand implementation details through annotated code
 
-The notebook emphasizes clarity of logic and financial intuition behind each step.
+Unlike time-series momentum, which evaluates each asset independently, this framework compares assets against one another at each rebalance date.
 
 ---
 
 ## Strategy Logic
 
-Unlike time-series momentum, which evaluates each asset independently, this framework:
-
-- Compares assets against one another
-- Ranks them cross-sectionally
-- Allocates capital to top-ranked vs bottom-ranked assets
-
 At each rebalance date:
 
-1. Compute factor scores
-2. Rank assets
+1. Compute factor scores for all assets
+2. Rank assets cross-sectionally
 3. Select top quantile for long positions
 4. Select bottom quantile for short positions
-5. Rebalance portfolio
+5. Rebalance portfolio weights
+
+Cross-sectional ranking removes common market drift and isolates relative strength.
 
 ---
 
 ## Signal Construction
 
-Typical cross-sectional factors may include:
+Typical factors include:
 
-- Momentum (past N-day returns)
-- Volatility-adjusted returns
+- Momentum (past N-day return)
+- Volatility-adjusted return
 - Rolling Sharpe ratio
-- Mean-reversion signals
-- Relative strength measures
+- Mean-reversion score
+- Relative strength indicator
 
-Signals are standardized before ranking to ensure comparability.
+Signals are standardized before ranking to ensure comparability across assets.
 
-Cross-sectional ranking removes market-level drift and isolates relative performance.
+Standardization example:
+
+z_score_i = (signal_i - cross_section_mean) / cross_section_std
 
 ---
 
@@ -56,71 +54,67 @@ Cross-sectional ranking removes market-level drift and isolates relative perform
 
 - Equal weight within long basket
 - Equal weight within short basket
-- Dollar-neutral or beta-neutral structure
+- Dollar-neutral structure
 
-### Rebalancing Frequency
+If there are L long assets and S short assets:
 
-- Daily
-- Weekly
-- Monthly
+weight_long_i  =  1 / L  
+weight_short_i = -1 / S  
 
-Performance is sensitive to turnover and signal decay.
+Total portfolio weight sums to zero.
 
 ---
 
-## Backtesting Framework
+## Portfolio Return Calculation
 
-The backtest includes:
+Portfolio return at time t:
 
-- Rolling signal computation
-- Position shifting to avoid look-ahead bias
+R_portfolio_t = sum over i of ( weight_i at time t-1 * return_i at time t )
+
+This ensures no look-ahead bias.
+
+In expanded form:
+
+R_portfolio_t = w_1,t-1 * R_1,t  
+              + w_2,t-1 * R_2,t  
+              + ...  
+              + w_n,t-1 * R_n,t  
+
+---
+
+## Performance Metrics
+
+Annualized Return:
+
+Annual_Return = mean(daily_returns) * 252
+
+Annualized Volatility:
+
+Annual_Volatility = std(daily_returns) * sqrt(252)
+
+Sharpe Ratio:
+
+Sharpe = Annual_Return / Annual_Volatility
+
+Maximum Drawdown:
+
+Drawdown_t = (Peak_NAV - NAV_t) / Peak_NAV
+
+---
+
+## Backtesting Considerations
+
+The implementation includes:
+
+- Signal shifting to prevent look-ahead bias
+- Rolling ranking
+- Position rebalancing
 - Transaction cost modeling
-- Cumulative return tracking
-- Performance metrics calculation
+- Turnover tracking
 
-Returns are computed based on:
+Turnover at time t:
 
-\[
-R_{portfolio,t} = \sum_{i} w_{i,t-1} R_{i,t}
-\]
-
-Where:
-
-- \( w_{i,t-1} \) = previous period weights
-- \( R_{i,t} \) = asset returns
-
----
-
-## Risk and Performance Metrics
-
-The following metrics are evaluated:
-
-- Annualized return
-- Volatility
-- Sharpe ratio
-- Maximum drawdown
-- Hit ratio
-- Turnover
-
-Long-only and long–short variants may be compared.
-
----
-
-## Implementation Details
-
-The notebook emphasizes:
-
-- Clean signal alignment
-- Handling missing data
-- Rank stability
-- Weight normalization
-- Vectorized computation with pandas
-
-Annotations explain:
-
-- Why signals are shifted
-- How ranking impacts neutrality
-- How exposure is normalized
+Turnover_t = sum over i of abs(weight_i,t - weight_i,t-1)
 
 ---
 
@@ -128,12 +122,11 @@ Annotations explain:
 
 This framework can be extended to:
 
-- Multi-factor ranking models
-- Cross-sectional machine learning models
-- Sector-neutral construction
-- Risk-parity weighting
+- Multi-factor composite ranking
+- Sector-neutral portfolio construction
+- Beta-neutral adjustment
 - Volatility targeting overlay
-- Transaction cost optimization
+- Machine learning cross-sectional scoring
 
 ---
 
@@ -143,10 +136,8 @@ Cross-sectional strategies are widely used in:
 
 - Equity market-neutral funds
 - Statistical arbitrage
-- Quant long–short portfolios
-- Factor investing strategies
-
-They form a core building block of many systematic hedge fund models.
+- Factor investing portfolios
+- Long–short hedge fund strategies
 
 ---
 
