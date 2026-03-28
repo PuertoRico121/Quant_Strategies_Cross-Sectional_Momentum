@@ -1,147 +1,156 @@
-# Cross-Sectional Momentum Strategy  
-### Factor-Based Equity Portfolio Construction
+# Cross-Sectional Equity Strategy (Annotated Implementation)
 
 ## Overview
 
-This project implements a **cross-sectional momentum strategy** with full annotations explaining each modeling and portfolio construction step.
+This project implements a **cross-sectional equity trading strategy** based on ranking and relative performance across assets.
 
 The objective is to:
 
-- Rank assets cross-sectionally by momentum
-- Construct long-short portfolios
-- Evaluate performance stability
-- Analyze turnover and transaction costs
-- Understand factor-driven return decomposition
+- Construct cross-sectional signals
+- Rank assets by factor scores
+- Form long–short portfolios
+- Evaluate performance with realistic backtesting assumptions
+- Understand implementation details through annotated code
 
-This notebook emphasizes clarity of implementation and economic intuition.
+The notebook emphasizes clarity of logic and financial intuition behind each step.
 
 ---
 
 ## Strategy Logic
 
-Cross-sectional momentum exploits relative performance differences between assets.
+Unlike time-series momentum, which evaluates each asset independently, this framework:
+
+- Compares assets against one another
+- Ranks them cross-sectionally
+- Allocates capital to top-ranked vs bottom-ranked assets
 
 At each rebalance date:
 
-1. Compute trailing returns over a lookback window
-2. Rank assets cross-sectionally
-3. Long top quantile
-4. Short bottom quantile
-5. Rebalance periodically
+1. Compute factor scores
+2. Rank assets
+3. Select top quantile for long positions
+4. Select bottom quantile for short positions
+5. Rebalance portfolio
 
 ---
 
 ## Signal Construction
 
-### Momentum Factor
+Typical cross-sectional factors may include:
 
-Momentum signal:
-
-\[
-M_i = \frac{P_{t}}{P_{t-L}} - 1
-\]
-
-Where:
-
-- \( L \) = Lookback window  
-- \( P_t \) = Current price  
-- \( P_{t-L} \) = Historical price  
-
-Signals are ranked cross-sectionally.
-
----
-
-## Portfolio Construction
-
-### Long-Short Portfolio
-
-- Long: Top decile (or quintile)
-- Short: Bottom decile (or quintile)
-- Equal weight within each side
-- Dollar-neutral structure
-
-Portfolio return:
-
-\[
-R_t = \frac{1}{N_L}\sum_{i \in Long} r_{i,t}
--
-\frac{1}{N_S}\sum_{i \in Short} r_{i,t}
-\]
-
----
-
-## Risk Management
-
-The framework evaluates:
-
-- Volatility of long-short spread
-- Maximum drawdown
+- Momentum (past N-day returns)
+- Volatility-adjusted returns
 - Rolling Sharpe ratio
-- Turnover and trading intensity
+- Mean-reversion signals
+- Relative strength measures
 
-Optional extensions include:
+Signals are standardized before ranking to ensure comparability.
 
-- Volatility scaling
-- Beta-neutral adjustment
-- Sector-neutral ranking
-- Liquidity filtering
+Cross-sectional ranking removes market-level drift and isolates relative performance.
+
+---
+
+## Portfolio Formation
+
+### Long–Short Construction
+
+- Equal weight within long basket
+- Equal weight within short basket
+- Dollar-neutral or beta-neutral structure
+
+### Rebalancing Frequency
+
+- Daily
+- Weekly
+- Monthly
+
+Performance is sensitive to turnover and signal decay.
 
 ---
 
 ## Backtesting Framework
 
-- Rolling formation period
-- Out-of-sample evaluation
-- Rebalancing frequency control
-- Transaction cost deduction
-- Cumulative NAV tracking
+The backtest includes:
 
-Performance metrics include:
+- Rolling signal computation
+- Position shifting to avoid look-ahead bias
+- Transaction cost modeling
+- Cumulative return tracking
+- Performance metrics calculation
 
-- Annualized return
-- Annualized volatility
-- Sharpe ratio
-- Information ratio
-- Hit ratio
+Returns are computed based on:
+
+\[
+R_{portfolio,t} = \sum_{i} w_{i,t-1} R_{i,t}
+\]
+
+Where:
+
+- \( w_{i,t-1} \) = previous period weights
+- \( R_{i,t} \) = asset returns
 
 ---
 
-## Factor Interpretation
+## Risk and Performance Metrics
 
-This strategy captures:
+The following metrics are evaluated:
 
-- Behavioral underreaction
-- Trend persistence
-- Institutional flow continuation
+- Annualized return
+- Volatility
+- Sharpe ratio
+- Maximum drawdown
+- Hit ratio
+- Turnover
 
-The long-short structure isolates relative strength rather than market direction.
+Long-only and long–short variants may be compared.
+
+---
+
+## Implementation Details
+
+The notebook emphasizes:
+
+- Clean signal alignment
+- Handling missing data
+- Rank stability
+- Weight normalization
+- Vectorized computation with pandas
+
+Annotations explain:
+
+- Why signals are shifted
+- How ranking impacts neutrality
+- How exposure is normalized
 
 ---
 
 ## Extensions
 
-Possible enhancements:
+This framework can be extended to:
 
-- Multi-factor stacking (Value + Momentum)
-- Residual momentum (beta-neutralized)
-- Volatility-adjusted position sizing
-- Cross-asset implementation
-- Regime-dependent exposure
+- Multi-factor ranking models
+- Cross-sectional machine learning models
+- Sector-neutral construction
+- Risk-parity weighting
+- Volatility targeting overlay
+- Transaction cost optimization
 
 ---
 
-## Educational Value
+## Applications
 
-This notebook demonstrates:
+Cross-sectional strategies are widely used in:
 
-- Clean cross-sectional ranking implementation
-- Portfolio construction mechanics
-- Quantitative performance evaluation
-- Factor investing intuition
+- Equity market-neutral funds
+- Statistical arbitrage
+- Quant long–short portfolios
+- Factor investing strategies
+
+They form a core building block of many systematic hedge fund models.
 
 ---
 
 ## Disclaimer
 
-For research and educational purposes only.  
-Not investment advice.
+This project is for research and educational purposes only.  
+It does not constitute investment advice.
